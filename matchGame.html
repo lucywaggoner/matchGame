@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+	div#memory_board{
+		background:#CCC;
+		border:#999 1px solid;
+		width:800px;
+		height:540px;
+		padding:20px;
+		margin:0px auto;
+	}
+	div#memory_board > div{
+		border:#000 1px solid;
+		width:110px;
+		height:160px;
+		cursor:pointer;
+		float: left;
+		margin: 5px;
+		margin-left: 5px;
+		background: url('AceCard.PNG') no-repeat;
+		background-size: 110px 160px;
+		text-align: center;
+		font-size: 50px;
+		position: relative;
+		left: 30px;
+
+		transition: transform 1s;
+		transform-style: preserve-3d;
+	}
+	div#gameOver {
+		width: 600px;
+		height: 80px;
+		cursor:pointer;
+		margin: 5px;
+		margin-left: 5px;
+		background-size: 110px 160px;
+		text-align: center;
+		font-size: 80px;
+
+		visibility: hidden;
+
+	}
+
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script>
+// numbers, letters, symbols, emojis - what do you want?
+var memory_array = [1,1,2,2,3,3,4,4,5,5,6,6,7,7, 8, 8, 9, 9]; //each one of these is matche
+
+// the first card's number, letter or emoji selected goes into memory_values []
+// it's id, like "tile_1" goes into memory_tile_ids []
+var memory_values = [];
+var memory_tile_ids = [];
+var tiles_flipped = 0;
+
+// shuffle array of tiles
+Array.prototype.memory_tile_shuffle = function(){
+	var i = this.length, j, temp;
+	while(--i > 0){
+		j = Math.floor(Math.random() * (i+1)); // give us a random number between 1 and 100
+		temp = this[j];
+		this[j] = this[i];
+		this[i] = temp;
+	}
+}
+function newBoard(){
+	//document.getElementById('gameOver').innerHTML = "";
+	tiles_flipped = 0;
+	var output = ''; //holds HTML/div
+	memory_array.memory_tile_shuffle();
+	for(var i = 0; i < memory_array.length; i++){ //set the div with certain numbers, starting from 0
+		output += `<div id="tile_${i}" onClick="flipTile(this, '${memory_array[i]}')"></div>`; //set up the tiles 
+	}
+	document.getElementById('memory_board').innerHTML = output; //we need to put something in here so we make sure that the tile ids get filled up when we create the tiles
+
+}
+
+function flipTile(tile,val){
+	if(tile.innerHTML == "" && memory_values.length < 2){
+
+		turnCard(tile, val, 0);
+		if(memory_values.length == 0){
+			memory_values.push(val);
+			memory_tile_ids.push(tile.id);
+		} 
+
+		else if(memory_values.length == 1){
+			memory_values.push(val);
+			memory_tile_ids.push(tile.id);
+			console.log(memory_values, memory_tile_ids);
+
+			if(memory_values[0] == memory_values[1]){
+				tiles_flipped += 2;
+				// Clear both temporary arrays
+				memory_values = [];
+				memory_tile_ids = [];
+				if(tiles_flipped == memory_array.length){
+					function func() {
+						return function() {
+							//document.getElementById('gameOver').innerHTML = "You Won!";
+							alert('You have won! Resetting board.');
+							document.getElementById('memory_board').innerHTML = "";
+							newBoard();	
+						}
+					}
+					setTimeout(func(), 1000)
+				}
+			} 
+			else {
+				function flip2Back(){
+				    // Flip the 2 tiles back over
+				    var tile_1 = document.getElementById(memory_tile_ids[0]);
+				    var tile_2 = document.getElementById(memory_tile_ids[1]);
+				    turnCard(tile_1, val, 1);
+				    turnCard(tile_2, val, 1);
+				    // Clear both temporary arrays
+				    memory_values = [];
+				    memory_tile_ids = [];
+				}
+				setTimeout(flip2Back, 1000);
+			}
+		}
+	}
+}
+
+var CARDWIDTH = 110;
+
+function turnCard(elem, val, side) { //side 0 == front
+
+	$(elem).animate({
+		width: 0,
+		marginLeft: CARDWIDTH / 2,
+		marginRight: CARDWIDTH / 2
+	}, function () {
+		
+		$(this).animate({
+			width: CARDWIDTH,
+			marginLeft: 5,
+			marginRight: 5,
+		})
+
+		if (side == 0) {
+			elem.style.background = 'yellow';
+			elem.innerHTML = val;
+		}
+		else if (side == 1) {
+			elem.style.background = 'url("AceCard.png") no-repeat'; 
+			elem.style.backgroundSize = "110px 160px";
+			elem.innerHTML = "";
+		}
+	})
+}
+
+</script>
+</head>
+<body>
+	<div id="memory_board"></div>
+	<script>newBoard();</script>
+</body>
+</html>S
